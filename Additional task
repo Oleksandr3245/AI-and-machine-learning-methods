@@ -4,28 +4,21 @@ df.head()
 
 excel_data = pd.ExcelFile("/[ПР №3] zfpo_rivne_region (3).xlsx")
 data_zdobuvachi = excel_data.parse('Вступ групи')
-
 total_students = data_zdobuvachi['Вступники'].sum()
 total_students
 
-excel_data = pd.ExcelFile("/[ПР №3] zfpo_rivne_region (3).xlsx")
 
 data_vstup_grupy = excel_data.parse('Вступ групи')
 data_zdobuvachi = excel_data.parse('Здобувачі')
-
 if 'Заклад освіти' in data_vstup_grupy.columns and 'Вступники' in data_vstup_grupy.columns and \
-   'Заклад освіти' in data_zdobuvachi.columns and 'Здобувачів' in data_zdobuvachi.columns:
-    
+   'Заклад освіти' in data_zdobuvachi.columns and 'Здобувачів' in data_zdobuvachi.columns:    
     vstup_by_college = data_vstup_grupy.groupby('Заклад освіти')['Вступники'].sum()
     zdobuvachi_by_college = data_zdobuvachi.groupby('Заклад освіти')['Здобувачів'].sum()
-
     combined_data = pd.DataFrame({
         'Вступники': vstup_by_college,
         'Здобувачі': zdobuvachi_by_college
-    })
-    
+    })    
     combined_data['Відсоток'] = (combined_data['Вступники'] / (combined_data['Вступники'] + combined_data['Здобувачі'])) * 100
-
     print(combined_data)
 else:
     print("Не знайдено необхідних стовпців у таблицях.")
