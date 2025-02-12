@@ -1,0 +1,25 @@
+import numpy as np
+import tensorflow as tf
+from tensorflow import keras
+import matplotlib.pyplot as plt
+
+X = np.array([1, 2, 3, 4, 5, 6], dtype=float)
+Y = 5 * X + 2
+
+model = keras.Sequential([
+    keras.layers.Dense(units=3, input_shape=[1], activation='relu'),  # Перший шар з 3 нейронами
+    keras.layers.Dense(units=1)
+])
+
+model.compile(optimizer='adam', loss='mean_squared_error')
+
+history = model.fit(X, Y, epochs=500, verbose=0)
+
+prediction = model.predict(np.array([7]))
+print(f"Прогноз для X=7: {prediction[0][0]}")
+
+plt.plot(history.history['loss'])
+plt.xlabel('Епохи')
+plt.ylabel('Втрати')
+plt.title('Процес навчання')
+plt.show()
