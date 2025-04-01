@@ -1,0 +1,49 @@
+import keras
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+from keras.preprocessing.sequence import TimeseriesGenerator
+
+df = pd.read_csv(r"C:\Users\User\Downloads\river_flow.csv")
+df['Date'] = pd.to_datetime(df['Date'])
+df.set_index('Date', inplace=True)
+
+data = df.values.reshape(-1, 1)  
+split = int(0.8 * len(data))  
+train_data, test_data = data[:split], data[split:]
+
+look_back = 20
+
+train_generator = TimeseriesGenerator(train_data, train_data, length=look_back, batch_size=16)
+test_generator = TimeseriesGenerator(test_data, test_data, length=look_back, batch_size=1)
+
+model = keras.Sequential([
+    keras.layers.LSTM(50, activation='relu', input_shape=(look_back, 1)),
+    keras.layers.Dense(1)
+])
+
+model.compile(optimizer='adam', loss='mse')
+
+history = model.fit(train_generator, epochs=30, verbose=1)
+
+
+prediction = model.predict(test_generator).flatten()
+
+plt.plot(df.index[split + look_back:split + look_back + len(prediction)], test_data[look_back:], label="Реальні дані")
+plt.plot(df.index[split + look_back:split + look_back + len(prediction)], prediction, label="Прогноз")
+
+def predict_future(days, model):
+    future_predict = test_data[-look_back:].reshape(-1, 1)
+    for _ in range(days):
+        x = future_predict[-look_back:].reshape((1, look_back, 1))
+        next_value = model.predict(x)[0][0]
+        future_predict = np.append(future_predict, next_value)
+    return future_predict[-days:]
+
+future_forecast = predict_future(30, model)
+
+future_dates = pd.date_range(start=df.index[-1] + pd.Timedelta(days=1), periods=30)
+
+plt.plot(future_dates, future_forecast, label="Прогноз на 30 днів")
+plt.legend()
+plt.show()
